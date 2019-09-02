@@ -47,50 +47,6 @@ function getUsers($since = 0, $per_page = 10) {
 	return $convertedOutput;
 }
 
-function checkDBUsr($uid, $login) {
-
-	$config = require('config.php');
-	$host    = $config['host'];
-	$db      = $config['db'];
-	$user    = $config['user'];
-	$pass    = $config['pass'];
-	$charset = $config['charset'];
-	
-	$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-	$options = [
-		PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::ATTR_EMULATE_PREPARES   => false,
-	];
-	
-	try {
-		$pdo = new PDO($dsn, $user, $pass, $options);
-	}
-	catch (\PDOException $e) {
-		throw new \PDOException($e->getMessage(), (int)$e->getCode());
-	}
-	
-	$stmt = $pdo->query('SELECT * FROM user WHERE github_id=' . $uid);
-	$row  = $stmt->fetch();
-	if ($row['github_id'] == $uid) {
-//		echo "userID " . $uid . " exists";
-		if ($row['github_login'] == $login) {
-			return 1;
-			// user exists, no changes required
-		}
-		else {
-			return 2;
-			// user exists, login update required
-		}
-		
-	}
-	else {
-//		echo "user not found in database";
-		return 0;
-		//no user with given id found in the db
-	}
-}
-
 function dbOPS($payload, $operation) {
 	$config = require('config.php');
 	$host    = $config['host'];
@@ -98,13 +54,8 @@ function dbOPS($payload, $operation) {
 	$user    = $config['user'];
 	$pass    = $config['pass'];
 	$charset = $config['charset'];
-	
 	$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-	$options = [
-		PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::ATTR_EMULATE_PREPARES   => false,
-	];
+	$options = $config['options'];
 	try {
 		$pdo = new PDO($dsn, $user, $pass, $options);
 	}
@@ -125,6 +76,26 @@ function dbOPS($payload, $operation) {
 		$sql  = "UPDATE user SET github_login=:github_login WHERE github_id=:github_id";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
+	} elseif ($operation == 'check'){
+		$stmt = $pdo->query('SELECT * FROM user WHERE github_id=' . $payload['id']);
+		$row  = $stmt->fetch();
+		if ($row['github_id'] == $payload['id']) {
+//		echo "userID " . $uid . " exists";
+			if ($row['github_login'] == $payload['login']) {
+				return 1;
+				// user exists, no changes required
+			}
+			else {
+				return 2;
+				// user exists, login update required
+			}
+			
+		}
+		else {
+//		echo "user not found in database";
+			return 0;
+			//no user with given id found in the db
+		}
 	}
 	else {
 		echo "unknown operation";
@@ -133,12 +104,12 @@ function dbOPS($payload, $operation) {
 }
 
 foreach (getUsers() as $user) {
-	if (!checkDBUsr($user["id"], $user["login"])) {
+	if (!dbOps($user, 'check')) {
 		dbOps($user, "insert");
 		echo "added user " . $user["login"] . " with id=" . $user["id"] . "\n";
 	}
-	else if (checkDBUsr($user["id"], $user["login"]) == 2) {
-		echo "userID " . $user['id'] . " exists, " . "login change required" . "\n";
+	else if (dbOps($user, 'check') == 2) {
+		echo "userID " . $user['id'] . " exists, " . "login changed" . "\n";
 		dbOps($user, "update");
 	}
 	else {
