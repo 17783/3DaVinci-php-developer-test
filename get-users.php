@@ -1,28 +1,5 @@
 <?php
-
-function getUser($username = "octocat") {
-	// create curl resource
-	
-	$ch      = curl_init();
-	$fullUrl = "https://api.github.com/users/" . $username;
-	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
-	// set url
-	curl_setopt($ch, CURLOPT_URL, $fullUrl);
-	
-	//return the transfer as a string
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	
-	// $output contains the output string
-	$output = curl_exec($ch);
-	
-	// close curl resource to free up system resources
-	curl_close($ch);
-	//parse json string to an ass array
-	$convertedOutput = json_decode($output, true);
-	echo "got user: " . $convertedOutput['login'];
-	
-	return $convertedOutput;
-}
+$last_user = 54819341;
 
 function getUsers() {
 	$config   = require('config.php');
@@ -45,6 +22,32 @@ function getUsers() {
 	curl_close($ch);
 	//parse json string to an ass array
 	$convertedOutput = json_decode($output, true);
+	
+	return $convertedOutput;
+}
+
+function getAllUsers() {
+	$config   = require('config.php');
+	$since    = $config['since'];
+	$per_page = $config['per_page'];
+	// create curl resource
+	$ch      = curl_init();
+	$fullUrl = "https://api.github.com/users?per_page=" . $per_page . "&since=" . $since;
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
+	// set url
+	curl_setopt($ch, CURLOPT_URL, $fullUrl);
+	
+	//return the transfer as a string
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	
+	// $output contains the output string
+	$output = curl_exec($ch);
+	
+	// close curl resource to free up system resources
+	curl_close($ch);
+	//parse json string to an ass array
+	$convertedOutput = json_decode($output, true);
+	$last_id = end($convertedOutput)['id'];
 	
 	return $convertedOutput;
 }
@@ -106,7 +109,47 @@ function dbOPS($payload, $operation) {
 	
 }
 
-foreach (getUsers() as $user) {
+function getUser($username = "octocat") {
+	// create curl resource
+	$ch      = curl_init();
+	$fullUrl = "https://api.github.com/users/" . $username;
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
+	// set url
+	curl_setopt($ch, CURLOPT_URL, $fullUrl);
+	
+	//return the transfer as a string
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	
+	// $output contains the output string
+	$output = curl_exec($ch);
+	
+	// close curl resource to free up system resources
+	curl_close($ch);
+	//parse json string to an ass array
+	$convertedOutput = json_decode($output, true);
+	if (!($convertedOutput['message'] == "Not Found")) {
+//		echo "got user: " . $convertedOutput['login'];
+		
+		return $convertedOutput;
+	}
+	else {
+		echo $convertedOutput['message'];
+		
+		return 0;
+	}
+
+//	echo $output;
+
+}
+
+if ($argc > 1) {
+	$users[] = getUser($argv[1]);
+}
+else {
+	$users = getUsers();
+}
+
+foreach ($users as $user) {
 	if (!dbOps($user, 'check')) {
 		//add new user
 		dbOps($user, "insert");

@@ -2,7 +2,7 @@
 
 return [
 	'since'    => '54819181', // starting user id
-	'per_page' => '10', //results per request
+	'per_page' => '100', //results per request
 	'host'     => '127.0.0.1',
 	'db'       => '3davinci',
 	'user'     => 'root',
