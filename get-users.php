@@ -108,10 +108,12 @@ function dbOPS($payload, $operation) {
 
 foreach (getUsers() as $user) {
 	if (!dbOps($user, 'check')) {
+		//add new user
 		dbOps($user, "insert");
 		echo "added user " . $user["login"] . " with id=" . $user["id"] . "\n";
 	}
 	else if (dbOps($user, 'check') == 2) {
+		//change login for user
 		echo "userID " . $user['id'] . " exists, " . "login changed" . "\n";
 		dbOps($user, "update");
 	}
