@@ -43,26 +43,12 @@ function getUsers($since = 0, $per_page = 10) {
 	curl_close($ch);
 	//parse json string to an ass array
 	$convertedOutput = json_decode($output, true);
-//	foreach ($convertedOutput as $user) {echo $user['login'] . "\n";}
-//	$lastId = end($convertedOutput)['id'];
-//	echo $lastId;
 	
 	return $convertedOutput;
 }
 
 function checkDBUsr($uid, $login) {
-//	$host    = '127.0.0.1';
-//	$db      = '3davinci';
-//	$user    = 'root';
-//	$pass    = '';
-//	$charset = 'utf8';
-//
-//	$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-//	$options = [
-//		PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-//		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-//		PDO::ATTR_EMULATE_PREPARES   => false,
-//	];
+
 	$config = require('config.php');
 	$host    = $config['host'];
 	$db      = $config['db'];
@@ -103,15 +89,15 @@ function checkDBUsr($uid, $login) {
 		return 0;
 		//no user with given id found in the db
 	}
-//	var_dump($userIds);
 }
 
 function dbOPS($payload, $operation) {
-	$host    = '127.0.0.1';
-	$db      = '3davinci';
-	$user    = 'root';
-	$pass    = '';
-	$charset = 'utf8';
+	$config = require('config.php');
+	$host    = $config['host'];
+	$db      = $config['db'];
+	$user    = $config['user'];
+	$pass    = $config['pass'];
+	$charset = $config['charset'];
 	
 	$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
 	$options = [
