@@ -1,8 +1,6 @@
 <?php
 
 return [
-	"option1" => "option value",
-	"option2" => "option value",
 	'host'    => '127.0.0.1',
 	'db'      => '3davinci',
 	'user'    => 'root',
