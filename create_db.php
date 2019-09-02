@@ -18,8 +18,7 @@ function firstRun() {
 		throw new \PDOException($e->getMessage(), (int)$e->getCode());
 	}
 	
-	$dbSQL = "CREATE DATABASE IF NOT EXISTS " . $db;
-	$stmt  = $pdo->prepare($dbSQL);
+	$stmt  = $pdo->prepare("CREATE DATABASE IF NOT EXISTS " . $db);
 	$stmt->execute();
 	
 	//now let's create the table
@@ -32,12 +31,7 @@ function firstRun() {
 		throw new \PDOException($e->getMessage(), (int)$e->getCode());
 	}
 	
-	$sql  = "CREATE TABLE IF NOT EXISTS `user` (
-        `github_id` int(11) UNSIGNED NOT NULL,
-        `github_login` varchar(255) NOT NULL,
-        PRIMARY KEY (github_id)
-		) ENGINE=InnoDB;";
-	$stmt = $pdo->prepare($sql);
+	$stmt = $pdo->prepare("CREATE TABLE IF NOT EXISTS `user` (`github_id` int(11) UNSIGNED NOT NULL, `github_login` varchar(255) NOT NULL, PRIMARY KEY (github_id)) ENGINE=InnoDB;");
 	$stmt->execute();
 }
 

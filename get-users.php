@@ -1,40 +1,20 @@
 <?php
 
-/**
- * Этот класс будет "главным".
- */
 class MainClass {
-	/**
-	 * Тут у нас будет синглтон подключения к БД
-	 *
-	 */
 	private static $_db;
-	// Что нам вообще надо?
-	// 1. Прочитать конфиг и подключиться к БД
-	// 2. Сделать запрос к API и записать данные в БД
 	
-	/**
-	 * Возвращает конфиг.
-	 * Подразумеваем, что конфиг находится в файле config.php
-	 */
+	// get config from config.php
 	private static function getConfig(): array {
 		return require('config.php');
 	}
 	
-	/**
-	 * Возвращает подключение к БД
-	 */
 	private static function db() {
-		// Если подключение уже создано - просто возвращаем его
 		if (self::$_db) {
-			// Смысл в том, что мы сразу возвращаем подключение, если оно уже раньше было создано (т.е. если эту функцию уже вызывали до этого)
 			return self::$_db;
 		}
 		else {
-			// Если функция вызывается первый раз, то self::$_db будет пустым - надо создать подключение и записать его туда.
-			
-			// Формируем опции подключения
-			$config = self::getConfig();
+			// get connection options from config
+			$config  = self::getConfig();
 			
 			$host    = $config['host'];
 			$db      = $config['db'];
@@ -44,35 +24,30 @@ class MainClass {
 			$dsn     = "mysql:host={$host};dbname={$db};charset={$charset}";
 			$options = $config['options'];
 			
-			// Само подключение
 			try {
 				self::$_db = new PDO($dsn, $user, $pass, $options);
-				// вот ^ это НЕ понятно
 			}
 			catch (\PDOException $e) {
-				// Немного избыточно это, но пока не буду трогать.
-				// так было в копипасте, я хз
 				throw new \PDOException($e->getMessage(), (int)$e->getCode());
 			}
 			
-			// Возвращаем подключение
 			return self::$_db;
 		}
 		
 	}
 	
 	private static function getUser($username) {
-		// TODO, если вообще надо
+		// TODO, if per-user search is needed
 	}
 	
-	/**
-	 * Делает запрос к API
-	 */
+	// API stuff
 	private static function getUsers(): array {
-		// TODO: магия с CURL
-		// create curl resource
-		$ch = curl_init();
+		$config = self::getConfig();
 		
+		$per_page = $config['per_page'];
+		$since = $config['since'];
+		// create curl resource
+		$ch      = curl_init();
 		$fullUrl = "https://api.github.com/users?per_page=" . $per_page . "&since=" . $since;
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
 		// set url
@@ -86,18 +61,38 @@ class MainClass {
 		
 		// close curl resource to free up system resources
 		curl_close($ch);
+		
 		//parse json string to an ass array
-		$convertedOutput = json_decode($output, true);
+		return json_decode($output, true);
 	}
 	
-
-	private static function start() {
-		// Что нам надо:
+	private static function writeToDb($users) {
+		self::db()->beginTransaction();
 		
-		// 1) сделать запрос к API по некоему URL
+		$stmt = self::db()->prepare("INSERT INTO user (github_id, github_login) VALUES(?, ?) ON DUPLICATE KEY UPDATE github_login = ?");
+		
+		foreach ($users as $user) {
+			$data = [
+				$user['id'],
+				$user['login'],
+				$user['login'],
+			];
+			
+			$stmt->execute($data);
+			
+		}
+		
+		self::db()->commit();
+	}
+	
+	public static function start() {
+		
+		// 1) get users via API
 		$users = self::getUsers();
 		
-		// 2) записать результат в БД
+		// 2) write results into DB
 		self::writeToDb($users);
 	}
 }
+
+MainClass::start();
