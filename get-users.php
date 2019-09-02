@@ -25,8 +25,8 @@ function getUser($username = "octocat") {
 }
 
 function getUsers() {
-	$config = require('config.php');
-	$since = $config['since'];
+	$config   = require('config.php');
+	$since    = $config['since'];
 	$per_page = $config['per_page'];
 	// create curl resource
 	$ch      = curl_init();
@@ -50,7 +50,7 @@ function getUsers() {
 }
 
 function dbOPS($payload, $operation) {
-	$config = require('config.php');
+	$config  = require('config.php');
 	$host    = $config['host'];
 	$db      = $config['db'];
 	$user    = $config['user'];
@@ -78,7 +78,8 @@ function dbOPS($payload, $operation) {
 		$sql  = "UPDATE user SET github_login=:github_login WHERE github_id=:github_id";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
-	} elseif ($operation == 'check'){
+	}
+	else if ($operation == 'check') {
 		$stmt = $pdo->query('SELECT * FROM user WHERE github_id=' . $payload['id']);
 		$row  = $stmt->fetch();
 		if ($row['github_id'] == $payload['id']) {
