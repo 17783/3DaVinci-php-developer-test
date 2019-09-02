@@ -70,7 +70,7 @@ function checkDBUsr($uid, $login) {
 		throw new \PDOException($e->getMessage(), (int)$e->getCode());
 	}
 	
-	$stmt = $pdo->query('SELECT * FROM users WHERE github_id=' . $uid);
+	$stmt = $pdo->query('SELECT * FROM user WHERE github_id=' . $uid);
 	$row  = $stmt->fetch();
 	if ($row['github_id'] == $uid) {
 //		echo "userID " . $uid . " exists";
@@ -111,25 +111,32 @@ function dbOPS($payload, $operation) {
 	catch (\PDOException $e) {
 		throw new \PDOException($e->getMessage(), (int)$e->getCode());
 	}
-	$data = [
+
+	$data     = [
 		'github_id'    => $payload['id'],
 		'github_login' => $payload['login'],
 	];
-	if ($operation== 'insert') {
-		$sql  = "INSERT INTO users (github_id, github_login) VALUES (:github_id, :github_login)";
+	if ($operation == 'insert') {
+		$sql  = "INSERT INTO user (github_id, github_login) VALUES (:github_id, :github_login)";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
-	} elseif ($operation == 'update') {
-		$sql  = "UPDATE users SET github_login=:github_login WHERE github_id=:github_id";
+	}
+	else if ($operation == 'update') {
+		$sql  = "UPDATE user SET github_login=:github_login WHERE github_id=:github_id";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute($data);
-	} else echo "unknown operation";
+	}
+	else {
+		echo "unknown operation";
+	}
 	
 }
+
 
 foreach (getUsers() as $user) {
 	if (!checkDBUsr($user["id"], $user["login"])) {
 		dbOps($user, "insert");
+		echo "added user " . $user["login"] . " with id=" . $user["id"] . "\n";
 	}
 	else if (checkDBUsr($user["id"], $user["login"]) == 2) {
 		echo "userID " . $user['id'] . " exists, " . "login change required" . "\n";
