@@ -1,6 +1,8 @@
 <?php
 
 return [
+	'since' => '54000000',
+	'per_page' => '10',
 	'host'    => '127.0.0.1',
 	'db'      => '3davinci',
 	'user'    => 'root',

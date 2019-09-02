@@ -24,9 +24,11 @@ function getUser($username = "octocat") {
 	return $convertedOutput;
 }
 
-function getUsers($since = 0, $per_page = 10) {
+function getUsers() {
+	$config = require('config.php');
+	$since = $config['since'];
+	$per_page = $config['per_page'];
 	// create curl resource
-	
 	$ch      = curl_init();
 	$fullUrl = "https://api.github.com/users?per_page=" . $per_page . "&since=" . $since;
 	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
