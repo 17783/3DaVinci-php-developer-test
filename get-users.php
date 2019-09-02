@@ -1,18 +1,5 @@
 <?php
 
-$host    = '127.0.0.1';
-$db      = '3davinci';
-$user    = 'root';
-$pass    = '';
-$charset = 'utf8';
-
-$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-	PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-	PDO::ATTR_EMULATE_PREPARES   => false,
-];
-
 function getUser($username = "octocat") {
 	// create curl resource
 	
@@ -105,7 +92,7 @@ function checkDBUsr($uid, $login) {
 //	var_dump($userIds);
 }
 
-function dbInsert($payload) {
+function dbOPS($payload, $operation) {
 	$host    = '127.0.0.1';
 	$db      = '3davinci';
 	$user    = 'root';
@@ -128,49 +115,28 @@ function dbInsert($payload) {
 		'github_id'    => $payload['id'],
 		'github_login' => $payload['login'],
 	];
-	$sql  = "INSERT INTO users (github_id, github_login) VALUES (:github_id, :github_login)";
-	$stmt = $pdo->prepare($sql);
-	$stmt->execute($data);
-}
-
-function dbUpdate($payload) {
-	$host    = '127.0.0.1';
-	$db      = '3davinci';
-	$user    = 'root';
-	$pass    = '';
-	$charset = 'utf8';
+	if ($operation== 'insert') {
+		$sql  = "INSERT INTO users (github_id, github_login) VALUES (:github_id, :github_login)";
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($data);
+	} elseif ($operation == 'update') {
+		$sql  = "UPDATE users SET github_login=:github_login WHERE github_id=:github_id";
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($data);
+	} else echo "unknown operation";
 	
-	$dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-	$options = [
-		PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::ATTR_EMULATE_PREPARES   => false,
-	];
-	try {
-		$pdo = new PDO($dsn, $user, $pass, $options);
-	}
-	catch (\PDOException $e) {
-		throw new \PDOException($e->getMessage(), (int)$e->getCode());
-	}
-	$data = [
-		'github_id'    => $payload['id'],
-		'github_login' => $payload['login'],
-	];
-	$sql  = "UPDATE users SET github_login=:github_login WHERE github_id=:github_id";
-	$stmt = $pdo->prepare($sql);
-	$stmt->execute($data);
 }
 
 foreach (getUsers() as $user) {
 	if (!checkDBUsr($user["id"], $user["login"])) {
-		dbInsert($user);
+		dbOps($user, "insert");
 	}
 	else if (checkDBUsr($user["id"], $user["login"]) == 2) {
 		echo "userID " . $user['id'] . " exists, " . "login change required" . "\n";
-		dbUpdate($user);
+		dbOps($user, "update");
 	}
 	else {
-		echo "userID " . $user['id'] . " exists, " . "user login match" . "\n";
+		echo "userID " . $user['id'] . " exists, " . "user login match, no changes required" . "\n";
 	}
 }
 
