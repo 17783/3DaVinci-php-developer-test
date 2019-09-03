@@ -7,3 +7,6 @@ Solution for https://github.com/3DaVinci/php-developer-test
 - check `config.php` for config parameters
 ## Run
 run `get-users.php`
+
+## Config parameters
+
