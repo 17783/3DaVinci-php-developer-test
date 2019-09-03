@@ -9,4 +9,5 @@ Solution for https://github.com/3DaVinci/php-developer-test
 run `get-users.php`
 
 ## Config parameters
-
+`since` - github user id to start searching from (note that for since=1 the search results would start from id=2)
+`per_page` - the number of users per request (max 100)
