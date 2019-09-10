@@ -1,8 +1,7 @@
 <?php
 
 return [
-	'since'    => '54822181', // starting user id
-	'per_page' => '100', //results per request
+
 	'host'     => '127.0.0.1',
 	'db'       => '3davinci',
 	'user'     => 'root',

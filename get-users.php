@@ -41,11 +41,11 @@ class MainClass {
 	}
 	
 	// API stuff
-	private static function getUsers(): array {
-		$config = self::getConfig();
+	private static function getUsers($since, $per_page): array {
+//		$config = self::getConfig();
 		
-		$per_page = $config['per_page'];
-		$since = $config['since'];
+//		$per_page = $config['per_page'];
+//		$since = $config['since'];
 		// create curl resource
 		$ch      = curl_init();
 		$fullUrl = "https://api.github.com/users?per_page=" . $per_page . "&since=" . $since;
@@ -79,16 +79,16 @@ class MainClass {
 			];
 			
 			$stmt->execute($data);
-			
+			echo '* added user ' . $user['login'] . ' with id ' . $user['id'] . "\n";
 		}
 		
 		self::db()->commit();
 	}
 	
-	public static function start() {
+	public static function start($since, $per_page) {
 		
 		// 1) get users via API
-		$users = self::getUsers();
+		$users = self::getUsers($since, $per_page);
 		
 		// 2) write results into DB
 		self::writeToDb($users);
@@ -97,4 +97,4 @@ class MainClass {
 
 //TODO: add users search since the last/latest/biggest id stored in DB
 
-MainClass::start();
+MainClass::start($argv[1], $argv[2]);
