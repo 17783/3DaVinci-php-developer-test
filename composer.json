@@ -1,0 +1,16 @@
+{
+	"name" : "applicant/3davinci-php-developer-test-with-composer",
+	"description" : "3davinci job application test case",
+	"minimum-stability" : "stable",
+	"license" : "proprietary",
+	"authors" : [
+		{
+			"name" : "applicant",
+			"email" : "foo@bar.com"
+		}
+	],
+	"require": {
+		"knplabs/github-api": "^2.11",
+		"php-http/guzzle6-adapter": "^1.1"
+	}
+}

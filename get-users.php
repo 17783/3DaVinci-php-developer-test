@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/vendor/autoload.php';
+
 class MainClass {
 	private static $_db;
 	
@@ -14,7 +16,7 @@ class MainClass {
 		}
 		else {
 			// get connection options from config
-			$config  = self::getConfig();
+			$config = self::getConfig();
 			
 			$host    = $config['host'];
 			$db      = $config['db'];
@@ -43,7 +45,7 @@ class MainClass {
 	// API stuff
 	private static function getUsers($since, $per_page): array {
 //		$config = self::getConfig();
-		
+
 //		$per_page = $config['per_page'];
 //		$since = $config['since'];
 		// create curl resource
@@ -64,6 +66,16 @@ class MainClass {
 		
 		//parse json string to an ass array
 		return json_decode($output, true);
+	}
+	
+	/// new getUsers variant via knplabs' composer gihub api instead of curl
+	private static function getUsers2($since, $per_page): array {
+	
+		$client = new \Github\Client();
+		
+		$users = $client->api('user')->all($since);
+		
+		return $users;
 	}
 	
 	private static function writeToDb($users) {
@@ -88,7 +100,7 @@ class MainClass {
 	public static function start($since, $per_page) {
 		
 		// 1) get users via API
-		$users = self::getUsers($since, $per_page);
+		$users = self::getUsers2($since, $per_page);
 		
 		// 2) write results into DB
 		self::writeToDb($users);
