@@ -1,6 +1,36 @@
 <?php
+use Github\Exception\InvalidArgumentException;
 
 require_once __DIR__ . '/vendor/autoload.php';
+
+class MyUser extends Github\Api\User {
+	public function all($id = null, $perPage=10)
+	{
+		if (!is_int($id)) {
+			return $this->get('/users');
+		}
+		return $this->get('/users', ['since' => rawurldecode($id), 'per_page' => $perPage]);
+	}
+}
+
+class MyClient extends Github\Client {
+	public function api($name)
+	{
+		switch ($name) {
+			
+			case 'user':
+			case 'users':
+				$api = new MyUser($this);
+				break;
+			
+			default:
+				throw new InvalidArgumentException(sprintf('Undefined api instance called: "%s"', $name));
+		}
+		
+		return $api;
+	}
+	
+}
 
 class MainClass {
 	private static $_db;
@@ -71,9 +101,10 @@ class MainClass {
 	/// new getUsers variant via knplabs' composer gihub api instead of curl
 	private static function getUsers2($since, $per_page): array {
 	
-		$client = new \Github\Client();
+		$client = new MyClient();
 		
-		$users = $client->api('user')->all($since);
+		$users = $client->api('user')->all((int) $since, $per_page);
+//		$users = $client->api('user')->all(13650163);
 		
 		return $users;
 	}
