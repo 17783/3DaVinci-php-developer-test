@@ -1,7 +1,9 @@
 # 3DaVinci-php-developer-test
-Solution for https://github.com/3DaVinci/php-developer-test
+Solution for https://github.com/3DaVinci/php-developer-test <br />
+Uses https://github.com/KnpLabs/php-github-api
 ## Install
-- just download the files.
+- clone the project
+- run `composer install`
 - you need to have MySQL (tested vs 5.7) and PHP (tested vs 7.2)
 - you can run `create_db.php` if you don't want to create the db/table manually
 - check `config-example.php` for config example
