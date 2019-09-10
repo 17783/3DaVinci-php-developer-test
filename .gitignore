@@ -1,8 +1,4 @@
+.idea
 *.iml
-/.idea/
 /config.php
 /vendor/
-/test.php
-composer.lock
-test.php
-vendor/
