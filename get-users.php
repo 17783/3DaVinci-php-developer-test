@@ -1,36 +1,6 @@
 <?php
-use Github\Exception\InvalidArgumentException;
 
 require_once __DIR__ . '/vendor/autoload.php';
-
-class MyUser extends Github\Api\User {
-	public function all($id = null, $perPage=10)
-	{
-		if (!is_int($id)) {
-			return $this->get('/users');
-		}
-		return $this->get('/users', ['since' => rawurldecode($id), 'per_page' => $perPage]);
-	}
-}
-
-class MyClient extends Github\Client {
-	public function api($name)
-	{
-		switch ($name) {
-			
-			case 'user':
-			case 'users':
-				$api = new MyUser($this);
-				break;
-			
-			default:
-				throw new InvalidArgumentException(sprintf('Undefined api instance called: "%s"', $name));
-		}
-		
-		return $api;
-	}
-	
-}
 
 class MainClass {
 	private static $_db;
@@ -73,37 +43,14 @@ class MainClass {
 	}
 	
 	// API stuff
-	private static function getUsers($since, $per_page): array {
-//		$config = self::getConfig();
-
-//		$per_page = $config['per_page'];
-//		$since = $config['since'];
-		// create curl resource
-		$ch      = curl_init();
-		$fullUrl = "https://api.github.com/users?per_page=" . $per_page . "&since=" . $since;
-		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
-		// set url
-		curl_setopt($ch, CURLOPT_URL, $fullUrl);
-		
-		//return the transfer as a string
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		
-		// $output contains the output string
-		$output = curl_exec($ch);
-		
-		// close curl resource to free up system resources
-		curl_close($ch);
-		
-		//parse json string to an ass array
-		return json_decode($output, true);
-	}
 	
 	/// new getUsers variant via knplabs' composer gihub api instead of curl
 	private static function getUsers2($since, $per_page): array {
-	
-		$client = new MyClient();
 		
-		$users = $client->api('user')->all((int) $since, $per_page);
+		$client = new CustomApi\MyClient();
+		
+		$users = $client->api('user')->all((int)$since, $per_page);
+
 //		$users = $client->api('user')->all(13650163);
 		
 		return $users;
